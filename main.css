@@ -1,0 +1,28 @@
+@font-face {
+  font-family: "font";
+  src: url("font.ttf") format("truetype");
+}
+
+
+
+
+th, td {
+  padding-top: 10px;
+  padding-bottom: 0px;
+  padding-left: 15px;
+  padding-right: 15px;
+
+  border-width: 3px;
+  border-style: solid;
+  border-color: #bfbfbf;
+}
+
+
+.tabla{
+  border-radius: 10px;
+  font-family: sans-serif;
+  border-width: 10px;
+  border-style: solid;
+  border-color: black;
+
+}
