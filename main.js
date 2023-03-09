@@ -266,7 +266,7 @@ function marcar(){
     }
 
     //Recreo
-    if(hora >= 13.30 && hora <= 14.50){
+    if(hora >= 14.50 && hora <= 14.59){
       if(dia == 1){document.getElementById('recre').style.backgroundColor = '#61e8c2'}
       if(dia == 2){document.getElementById('recre').style.backgroundColor = '#61e8c2'}
       if(dia == 3){document.getElementById('recre').style.backgroundColor = '#61e8c2'}
