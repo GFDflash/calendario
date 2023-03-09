@@ -1,5 +1,3 @@
-
-
 function marcar(){
   const date = new Date()
   horas = date.getHours()
@@ -265,21 +263,21 @@ function marcar(){
       if(dia == 5){document.getElementById('almu').style.backgroundColor = 'white'}
     }
 
-    //Recre0 14
+    //Recreo
     if(hora >= 13.30 && hora <= 14.50){
-      if(dia == 1){document.getElementById('almu').style.backgroundColor = '#61e8c2'}
-      if(dia == 2){document.getElementById('almu').style.backgroundColor = '#61e8c2'}
-      if(dia == 3){document.getElementById('almu').style.backgroundColor = '#61e8c2'}
-      if(dia == 4){document.getElementById('almu').style.backgroundColor = 'white'}
-      if(dia == 5){document.getElementById('almu').style.backgroundColor = 'white'}
+      if(dia == 1){document.getElementById('recre').style.backgroundColor = '#61e8c2'}
+      if(dia == 2){document.getElementById('recre').style.backgroundColor = '#61e8c2'}
+      if(dia == 3){document.getElementById('recre').style.backgroundColor = '#61e8c2'}
+      if(dia == 4){document.getElementById('recre').style.backgroundColor = 'white'}
+      if(dia == 5){document.getElementById('recre').style.backgroundColor = 'white'}
 
     }
     else{
-      if(dia == 1){document.getElementById('almu').style.backgroundColor = 'white'}
-      if(dia == 2){document.getElementById('almu').style.backgroundColor = 'white'}
-      if(dia == 3){document.getElementById('almu').style.backgroundColor = 'white'}
-      if(dia == 4){document.getElementById('almu').style.backgroundColor = 'white'}
-      if(dia == 5){document.getElementById('almu').style.backgroundColor = 'white'}
+      if(dia == 1){document.getElementById('recre').style.backgroundColor = 'white'}
+      if(dia == 2){document.getElementById('recre').style.backgroundColor = 'white'}
+      if(dia == 3){document.getElementById('recre').style.backgroundColor = 'white'}
+      if(dia == 4){document.getElementById('recre').style.backgroundColor = 'white'}
+      if(dia == 5){document.getElementById('recre').style.backgroundColor = 'white'}
     }
 
 
