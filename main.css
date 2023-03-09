@@ -1,3 +1,17 @@
+@font-face {
+  font-family: "font";
+  src: url("font.ttf") format("truetype");
+}
+
+body{
+  background-color: #a1426a;
+  opacity: 0.8;
+  background-image:  linear-gradient(30deg, #db5a90 12%, transparent 12.5%, transparent 87%, #db5a90 87.5%, #db5a90), linear-gradient(150deg, #db5a90 12%, transparent 12.5%, transparent 87%, #db5a90 87.5%, #db5a90), linear-gradient(30deg, #db5a90 12%, transparent 12.5%, transparent 87%, #db5a90 87.5%, #db5a90), linear-gradient(150deg, #db5a90 12%, transparent 12.5%, transparent 87%, #db5a90 87.5%, #db5a90), linear-gradient(60deg, #db5a9077 25%, transparent 25.5%, transparent 75%, #db5a9077 75%, #db5a9077), linear-gradient(60deg, #db5a9077 25%, transparent 25.5%, transparent 75%, #db5a9077 75%, #db5a9077);
+  background-size: 20px 35px;
+  background-position: 0 0, 0 0, 10px 18px, 10px 18px, 0 0, 10px 18px;
+}
+
+
 
 th, td {
   padding-top: 10px;
@@ -8,6 +22,8 @@ th, td {
   border-width: 3px;
   border-style: solid;
   border-color: #bfbfbf;
+
+  background-color: white;
 }
 
 
@@ -17,5 +33,6 @@ th, td {
   border-width: 10px;
   border-style: solid;
   border-color: black;
+  background-color: gray;
 
 }
