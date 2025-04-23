@@ -1,84 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rompecabezas Jigsaw</title>
+  <style>
+    body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #222; }
+    canvas { touch-action: none; background: #333; border: 2px solid #fff; }
+  </style>
+</head>
+<body>
+  <canvas id="puzzle" width="512" height="512"></canvas>
 
-<html lang="en" dir="ltr">
-  <head>
-    <meta charset="utf-8">
-    <title></title>
-  </head>
-  <body>
-    <center>
-    <table border="1" class="tabla">
-      <tr>
-        <td></td>
-        <td><h1>Lunes</h1></td>
-        <td><h1>Martes</h1></td>
-        <td><h1>Miercoles</h1></td>
-        <td><h1>Jueves</h1></td>
-        <td><h1>Viernes</h1></td>
-      </tr>
+  <script>
+    const canvas = document.getElementById("puzzle");
+    const ctx = canvas.getContext("2d");
+    const image = new Image();
+    image.src = "./puzzle_image.png";
 
-      <tr>
-        <td id="a"><h1>8:00 - 8:40</h1> </td> <td id="aa"><h1>Informatica</h1></td>  <td id="ab"><h1>Mat+Info</h1></td>  <td id="ac"><h1>Matematica</h1></td> <td id="ad"><h1>Quimica</h1></td> <td id="ae"><h1>Economia</h1></td>
-      </tr>
+    const rows = 4, cols = 4;
+    const pieceSize = 128;
+    const tabSize = pieceSize / 4;
+    const pieces = [];
+    const tabsMap = Array.from({ length: cols }, () => Array(rows).fill(null));
 
-      <tr>
-        <td id="b"><h1>8:40 - 9:20</h1> </td> <td id="ba"><h1>Informatica</h1></td>  <td id="bb"><h1>Mat+Info</h1></td>  <td id="bc"><h1>Matematica</h1></td>  <td id="bd"><h1>Quimica</h1></td>  <td id="be"><h1>Economia</h1></td>
-      </tr>
+    const rand = () => Math.random() > 0.5 ? 1 : -1;
 
-      <tr>
-        <td colspan="10"><h1 align="center">Recreo</h1></td>
-      </tr>
+    function createPath(x, y, col, row, size, tabs) {
+      const s = size;
+      const path = new Path2D();
+      path.moveTo(x, y);
 
-      <tr>
-        <td id="c"><h1>9:30 - 10:10</h1></td> <td id="ca"><h1>Lengua</h1></td>  <td id="cb"><h1>Matematica</h1></td>  <td id="cc"><h1>Economia</h1></td>  <td id="cd"><h1>Biologia</h1></td>  <td id="ce"><h1>Fisica</h1></td>
-      </tr>
+      // TOP
+      if (tabs.top === 0) {
+        path.lineTo(x + s, y);
+      } else {
+        const dir = tabs.top;
+        const mid = x + s / 2;
+        path.lineTo(mid - tabSize, y);
+        path.bezierCurveTo(mid - tabSize / 2, y - dir * tabSize, mid + tabSize / 2, y - dir * tabSize, mid + tabSize, y);
+        path.lineTo(x + s, y);
+      }
 
-      <tr>
-        <td id="d"><h1>10:10 - 10:50</h1></td> <td id="da"><h1>Lengua</h1></td>  <td id="db"><h1>Lengua</h1></td>  <td id="dc"><h1>Economia</h1></td>  <td id="dd"><h1>Biologia</h1></td>  <td id="de"><h1>Fisica</h1></td>
-      </tr>
+      // RIGHT
+      if (tabs.right === 0) {
+        path.lineTo(x + s, y + s);
+      } else {
+        const dir = tabs.right;
+        const mid = y + s / 2;
+        path.lineTo(x + s, mid - tabSize);
+        path.bezierCurveTo(x + s + dir * tabSize, mid - tabSize / 2, x + s + dir * tabSize, mid + tabSize / 2, x + s, mid + tabSize);
+        path.lineTo(x + s, y + s);
+      }
 
-      <tr>
-        <td id="e"><h1>10:50 - 11:00</h1></td> <td id="ea"><h1>Recreo</h1></td>  <td id="eb"><h1>Lengua</h1></td>  <td id="ec"><h1>Recreo</h1></td>  <td id="ed"><h1>Biologia</h1></td>  <td id="ee"><h1>Recreo</h1></td>
-      </tr>
+      // BOTTOM
+      if (tabs.bottom === 0) {
+        path.lineTo(x, y + s);
+      } else {
+        const dir = tabs.bottom;
+        const mid = x + s / 2;
+        path.lineTo(mid + tabSize, y + s);
+        path.bezierCurveTo(mid + tabSize / 2, y + s + dir * tabSize, mid - tabSize / 2, y + s + dir * tabSize, mid - tabSize, y + s);
+        path.lineTo(x, y + s);
+      }
 
-      <tr>
-        <td id="f"><h1>11:00 - 11:30</h1></td> <td id="fa"><h1>Geografia</h1></td>  <td id="fb"><h1>Lengua</h1></td>  <td id="fc"><h1>Historia</h1></td>  <td id="fd"><h1>Biologia</h1></td> <td id="fe"><h1>Civica</h1></td>
-      </tr>
+      // LEFT
+      if (tabs.left === 0) {
+        path.lineTo(x, y);
+      } else {
+        const dir = tabs.left;
+        const mid = y + s / 2;
+        path.lineTo(x, mid + tabSize);
+        path.bezierCurveTo(x - dir * tabSize, mid + tabSize / 2, x - dir * tabSize, mid - tabSize / 2, x, mid - tabSize);
+        path.lineTo(x, y);
+      }
 
-      <tr>
-        <td id="g"><h1>11:30 - 11:40</h1></td> <td id="ga"><h1>Geografia</h1></td>  <td id="gb"><h1>Recreo</h1></td>  <td id="gc"><h1>Historia</h1></td>  <td id="gd"><h1>Recreo</h1></td>  <td id="ge"><h1>Civica</h1></td>
-      </tr>
+      path.closePath();
+      return path;
+    }
 
-      <tr>
-        <td id="h"><h1>11:40 - 12:20</h1></td> <td id="ha"><h1>Geografia</h1></td>  <td id="hb"><h1>Ingles</h1></td>  <td id="hc"><h1>Historia</h1></td>  <td id="hd"><h1>Ingles</h1></td>  <td id="he"><h1>Civica</h1></td>
-      </tr>
+    class Piece {
+      constructor(i, j, tabs) {
+        this.col = i;
+        this.row = j;
+        this.correctX = i * pieceSize;
+        this.correctY = j * pieceSize;
+        this.x = Math.random() * (canvas.width - pieceSize);
+        this.y = Math.random() * (canvas.height - pieceSize);
+        this.tabs = tabs;
+        this.dragging = false;
+      }
 
-      <tr>
-        <td id="i"><h1>12:20 - 13:00</h1></td> <td id="ia"><h1>Geografia</h1></td>  <td id="ib"><h1>Ingles</h1></td>  <td id="ic"><h1>Historia</h1></td>  <td id="id"><h1>Ingles</h1></td>  <td id="ie"><h1>Cordinacion</h1></td>
-      </tr>
+      draw(context) {
+        const extra = tabSize;
+        const sx = this.col * pieceSize - extra;
+        const sy = this.row * pieceSize - extra;
+        const sw = pieceSize + extra * 2;
+        const sh = pieceSize + extra * 2;
 
-      <tr>
-        <td colspan="10" id="almu"><h1 align="center">Almuerzo</h1></td>
-      </tr>
+        const dx = this.x - extra;
+        const dy = this.y - extra;
+        const dw = sw;
+        const dh = sh;
 
-      <tr>
-        <td id="j"><h1>13:30 - 14:50</h1></td> <td id="ja"><h1>Adolescencia</h1></td>  <td id="jb"><h1>Plastica</h1></td>  <td id="jc"><h1>Taller Exp</h1></td>  <td id="jd"><h1></h1></td>  <td id="je"><h1></h1></td>
-      </tr>
+        const path = createPath(this.x, this.y, this.col, this.row, pieceSize, this.tabs);
+        context.save();
+        context.clip(path);
+        context.drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh);
+        context.restore();
 
-      <tr>
-        <td colspan="10" id="recre"><h1 align="center">Recreo</h1></td>
-      </tr>
+        context.strokeStyle = "white";
+        context.lineWidth = 2;
+        context.stroke(path);
+      }
 
-      <tr>
-        <td id="k"><h1>15:00 - 16:00</h1></td> <td id="ka"><h1>Ed. Fisica</h1></td>  <td id="kb"><h1>Frances</h1></td>  <td id="kc"><h1>Ed. Fisica</h1></td> <td id="kd"><h1></h1></td>  <td id="ke"><h1></h1></td>
-      </tr>
+      isCloseToCorrect() {
+        return Math.abs(this.x - this.correctX) < 10 && Math.abs(this.y - this.correctY) < 10;
+      }
 
-      <tr>
-        <td id="l"><h1>16:00 - 16:20</h1></td> <td id="la"><h1></h1></td>  <td id="lb"><h1>Frances</h1></td> <td id="lc"><h1></h1></td> <td id="ld"><h1></h1></td>  <td id="le"><h1></h1></td>
-      </tr>
+      snapToPlace() {
+        this.x = this.correctX;
+        this.y = this.correctY;
+      }
 
-    </table>
-  </center>
-    <script src="./main.js"></script>
-    <link href="main.css" rel="stylesheet" type="text/css">
-  </body>
+      contains(x, y) {
+        const path = createPath(this.x, this.y, this.col, this.row, pieceSize, this.tabs);
+        return ctx.isPointInPath(path, x, y);
+      }
+    }
+
+    let currentPiece = null;
+    let offsetX = 0, offsetY = 0;
+
+    image.onload = () => {
+      for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+          const tabs = {
+            top: j === 0 ? 0 : -tabsMap[i][j - 1].bottom,
+            left: i === 0 ? 0 : -tabsMap[i - 1][j].right,
+            bottom: j === rows - 1 ? 0 : rand(),
+            right: i === cols - 1 ? 0 : rand()
+          };
+          tabsMap[i][j] = tabs;
+        }
+      }
+
+      for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+          pieces.push(new Piece(i, j, tabsMap[i][j]));
+        }
+      }
+
+      drawAll();
+    };
+
+    function drawAll() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let p of pieces) p.draw(ctx);
+    }
+
+    function getPieceAt(x, y) {
+      for (let i = pieces.length - 1; i >= 0; i--) {
+        const p = pieces[i];
+        if (p.contains(x, y)) {
+          return p;
+        }
+      }
+      return null;
+    }
+
+    canvas.addEventListener("pointerdown", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      currentPiece = getPieceAt(x, y);
+      if (currentPiece) {
+        offsetX = x - currentPiece.x;
+        offsetY = y - currentPiece.y;
+        pieces.splice(pieces.indexOf(currentPiece), 1);
+        pieces.push(currentPiece);
+        currentPiece.dragging = true;
+      }
+    });
+
+    canvas.addEventListener("pointermove", (e) => {
+      if (!currentPiece) return;
+      const rect = canvas.getBoundingClientRect();
+      currentPiece.x = e.clientX - rect.left - offsetX;
+      currentPiece.y = e.clientY - rect.top - offsetY;
+      drawAll();
+    });
+
+    canvas.addEventListener("pointerup", () => {
+      if (!currentPiece) return;
+      currentPiece.dragging = false;
+      if (currentPiece.isCloseToCorrect()) {
+        currentPiece.snapToPlace();
+      }
+      currentPiece = null;
+      drawAll();
+    });
+  </script>
+</body>
 </html>
