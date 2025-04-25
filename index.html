@@ -3,136 +3,76 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rompecabezas Jigsaw</title>
+  <title>Compost NAT5</title>
   <style>
-    body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #222; }
-    canvas { touch-action: none; background: #333; border: 2px solid #fff; }
+    html, body { margin: 0; padding: 0; height: 100%; background: #222; display: flex; flex-direction: column; align-items: center; justify-content: start; }
+    canvas { touch-action: none; background: #333; border: 2px solid #fff; max-width: 90vw; max-height: 90vh; height: auto; width: auto; margin-top: 10px; }
+    select, button { font-size: 1rem; margin: 10px 5px; padding: 5px; }
   </style>
 </head>
 <body>
-  <canvas id="puzzle" width="512" height="512"></canvas>
 
+
+
+  <canvas id="puzzle"></canvas>
+  <a style="color: #3d3d3d; font-family: 'Arial', sans-serif;">Naturales 5°</a>
   <script>
     const canvas = document.getElementById("puzzle");
     const ctx = canvas.getContext("2d");
     const image = new Image();
-    image.src = "./IMG-20250422-WA0005.jpg";
+    image.src = "./puzzle_image2.png";
 
-    const rows = 4, cols = 4;
-    const pieceSize = 128;
-    const tabSize = pieceSize / 4;
-    const pieces = [];
-    const tabsMap = Array.from({ length: cols }, () => Array(rows).fill(null));
-
-    const rand = () => Math.random() > 0.5 ? 1 : -1;
-
-    function createPath(x, y, col, row, size, tabs) {
-      const s = size;
-      const path = new Path2D();
-      path.moveTo(x, y);
-
-      // TOP
-      if (tabs.top === 0) {
-        path.lineTo(x + s, y);
-      } else {
-        const dir = tabs.top;
-        const mid = x + s / 2;
-        path.lineTo(mid - tabSize, y);
-        path.bezierCurveTo(mid - tabSize / 2, y - dir * tabSize, mid + tabSize / 2, y - dir * tabSize, mid + tabSize, y);
-        path.lineTo(x + s, y);
-      }
-
-      // RIGHT
-      if (tabs.right === 0) {
-        path.lineTo(x + s, y + s);
-      } else {
-        const dir = tabs.right;
-        const mid = y + s / 2;
-        path.lineTo(x + s, mid - tabSize);
-        path.bezierCurveTo(x + s + dir * tabSize, mid - tabSize / 2, x + s + dir * tabSize, mid + tabSize / 2, x + s, mid + tabSize);
-        path.lineTo(x + s, y + s);
-      }
-
-      // BOTTOM
-      if (tabs.bottom === 0) {
-        path.lineTo(x, y + s);
-      } else {
-        const dir = tabs.bottom;
-        const mid = x + s / 2;
-        path.lineTo(mid + tabSize, y + s);
-        path.bezierCurveTo(mid + tabSize / 2, y + s + dir * tabSize, mid - tabSize / 2, y + s + dir * tabSize, mid - tabSize, y + s);
-        path.lineTo(x, y + s);
-      }
-
-      // LEFT
-      if (tabs.left === 0) {
-        path.lineTo(x, y);
-      } else {
-        const dir = tabs.left;
-        const mid = y + s / 2;
-        path.lineTo(x, mid + tabSize);
-        path.bezierCurveTo(x - dir * tabSize, mid + tabSize / 2, x - dir * tabSize, mid - tabSize / 2, x, mid - tabSize);
-        path.lineTo(x, y);
-      }
-
-      path.closePath();
-      return path;
-    }
-
-    class Piece {
-      constructor(i, j, tabs) {
-        this.col = i;
-        this.row = j;
-        this.correctX = i * pieceSize;
-        this.correctY = j * pieceSize;
-        this.x = Math.random() * (canvas.width - pieceSize);
-        this.y = Math.random() * (canvas.height - pieceSize);
-        this.tabs = tabs;
-        this.dragging = false;
-      }
-
-      draw(context) {
-        const extra = tabSize;
-        const sx = this.col * pieceSize - extra;
-        const sy = this.row * pieceSize - extra;
-        const sw = pieceSize + extra * 2;
-        const sh = pieceSize + extra * 2;
-
-        const dx = this.x - extra;
-        const dy = this.y - extra;
-        const dw = sw;
-        const dh = sh;
-
-        const path = createPath(this.x, this.y, this.col, this.row, pieceSize, this.tabs);
-        context.save();
-        context.clip(path);
-        context.drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh);
-        context.restore();
-
-        context.strokeStyle = "white";
-        context.lineWidth = 2;
-        context.stroke(path);
-      }
-
-      isCloseToCorrect() {
-        return Math.abs(this.x - this.correctX) < 10 && Math.abs(this.y - this.correctY) < 10;
-      }
-
-      snapToPlace() {
-        this.x = this.correctX;
-        this.y = this.correctY;
-      }
-
-      contains(x, y) {
-        const path = createPath(this.x, this.y, this.col, this.row, pieceSize, this.tabs);
-        return ctx.isPointInPath(path, x, y);
-      }
-    }
-
+    let rows, cols, pieceSizeX, pieceSizeY, tabSize;
+    let pieces = [];
     let currentPiece = null;
     let offsetX = 0, offsetY = 0;
 
-    image.onload = () => {
+    const rand = () => Math.random() > 0.5 ? 1 : -1;
+
+    function startPuzzle() {
+      const pieceCount = 20;
+      pieces = [];
+
+      if (!image.complete) {
+        image.onload = () => initPuzzle(pieceCount);
+      } else {
+        initPuzzle(pieceCount);
+      }
+    }
+
+    function initPuzzle(targetPieces) {
+      const aspect = image.width / image.height;
+      const maxW = window.innerWidth * 0.9;
+      const maxH = window.innerHeight * 0.9;
+
+      let drawW = maxW, drawH = maxW / aspect;
+      if (drawH > maxH) {
+        drawH = maxH;
+        drawW = maxH * aspect;
+      }
+
+      canvas.width = drawW;
+      canvas.height = drawH;
+
+      let bestDiff = Infinity;
+      for (let c = 1; c <= targetPieces; c++) {
+        let r = Math.round(targetPieces / c);
+        let total = r * c;
+        let currentAspect = c / r;
+        let diff = Math.abs(total - targetPieces) + Math.abs(currentAspect - aspect);
+        if (diff < bestDiff) {
+          cols = c;
+          rows = r;
+          bestDiff = diff;
+        }
+      }
+
+      pieceSizeX = drawW / cols;
+      pieceSizeY = drawH / rows;
+      tabSize = Math.min(pieceSizeX, pieceSizeY) / 4;
+
+      const tabsMap = Array.from({ length: cols }, () => Array(rows).fill(null));
+
       for (let i = 0; i < cols; i++) {
         for (let j = 0; j < rows; j++) {
           const tabs = {
@@ -152,19 +92,126 @@
       }
 
       drawAll();
-    };
+    }
+
+    function createPath(x, y, col, row, w, h, tabs) {
+      const path = new Path2D();
+      const sX = w;
+      const sY = h;
+      path.moveTo(x, y);
+
+      if (tabs.top === 0) path.lineTo(x + sX, y);
+      else {
+        const dir = tabs.top;
+        const mid = x + sX / 2;
+        path.lineTo(mid - tabSize, y);
+        path.bezierCurveTo(mid - tabSize / 2, y - dir * tabSize, mid + tabSize / 2, y - dir * tabSize, mid + tabSize, y);
+        path.lineTo(x + sX, y);
+      }
+
+      if (tabs.right === 0) path.lineTo(x + sX, y + sY);
+      else {
+        const dir = tabs.right;
+        const mid = y + sY / 2;
+        path.lineTo(x + sX, mid - tabSize);
+        path.bezierCurveTo(x + sX + dir * tabSize, mid - tabSize / 2, x + sX + dir * tabSize, mid + tabSize / 2, x + sX, mid + tabSize);
+        path.lineTo(x + sX, y + sY);
+      }
+
+      if (tabs.bottom === 0) path.lineTo(x, y + sY);
+      else {
+        const dir = tabs.bottom;
+        const mid = x + sX / 2;
+        path.lineTo(mid + tabSize, y + sY);
+        path.bezierCurveTo(mid + tabSize / 2, y + sY + dir * tabSize, mid - tabSize / 2, y + sY + dir * tabSize, mid - tabSize, y + sY);
+        path.lineTo(x, y + sY);
+      }
+
+      if (tabs.left === 0) path.lineTo(x, y);
+      else {
+        const dir = tabs.left;
+        const mid = y + sY / 2;
+        path.lineTo(x, mid + tabSize);
+        path.bezierCurveTo(x - dir * tabSize, mid + tabSize / 2, x - dir * tabSize, mid - tabSize / 2, x, mid - tabSize);
+        path.lineTo(x, y);
+      }
+
+      path.closePath();
+      return path;
+    }
+
+    class Piece {
+      constructor(i, j, tabs) {
+        this.col = i;
+        this.row = j;
+        this.correctX = i * pieceSizeX;
+        this.correctY = j * pieceSizeY;
+        this.x = Math.random() * (canvas.width - pieceSizeX);
+        this.y = Math.random() * (canvas.height - pieceSizeY);
+        this.tabs = tabs;
+        this.dragging = false;
+        this.locked = false;
+      }
+
+      draw(ctx) {
+        const extra = tabSize;
+        const sx = (this.col * image.width / cols) - extra * (image.width / canvas.width);
+        const sy = (this.row * image.height / rows) - extra * (image.height / canvas.height);
+        const sw = (pieceSizeX + 2 * extra) * image.width / canvas.width;
+        const sh = (pieceSizeY + 2 * extra) * image.height / canvas.height;
+
+        const dx = this.x - extra;
+        const dy = this.y - extra;
+        const dw = pieceSizeX + 2 * extra;
+        const dh = pieceSizeY + 2 * extra;
+
+        const path = createPath(this.x, this.y, this.col, this.row, pieceSizeX, pieceSizeY, this.tabs);
+        ctx.save();
+        ctx.clip(path);
+        ctx.drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh);
+        ctx.restore();
+
+        if (!this.locked) {
+          ctx.strokeStyle = "white";
+          ctx.lineWidth = 1.5;
+          ctx.stroke(path);
+        }
+      }
+
+      contains(x, y) {
+        if (this.locked) return false;
+        const path = createPath(this.x, this.y, this.col, this.row, pieceSizeX, pieceSizeY, this.tabs);
+        return ctx.isPointInPath(path, x, y);
+      }
+
+      isCloseToCorrect() {
+        return Math.abs(this.x - this.correctX) < 10 && Math.abs(this.y - this.correctY) < 10;
+      }
+
+      snapToPlace() {
+        this.x = this.correctX;
+        this.y = this.correctY;
+        this.locked = true;
+      }
+    }
 
     function drawAll() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       for (let p of pieces) p.draw(ctx);
     }
 
+    function checkCompletion() {
+      if (pieces.every(p => p.locked)) {
+        setTimeout(() => {
+          alert("🎉 ¡Rompecabezas completado!");
+        }, 100); // un pequeño retraso para que no interrumpa el último dibujado
+      }
+    }
+    
+
     function getPieceAt(x, y) {
       for (let i = pieces.length - 1; i >= 0; i--) {
-        const p = pieces[i];
-        if (p.contains(x, y)) {
-          return p;
-        }
+        if (pieces[i].contains(x, y)) return pieces[i];
       }
       return null;
     }
@@ -196,10 +243,15 @@
       currentPiece.dragging = false;
       if (currentPiece.isCloseToCorrect()) {
         currentPiece.snapToPlace();
+        pieces.splice(pieces.indexOf(currentPiece), 1);
+        pieces.unshift(currentPiece); // Mover al fondo
       }
       currentPiece = null;
+      checkCompletion()
       drawAll();
     });
+
+    startPuzzle();
   </script>
 </body>
 </html>
